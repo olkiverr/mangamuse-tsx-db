@@ -1,0 +1,104 @@
+:root {
+  /* Theme colors - Dark Theme (default) */
+  --bg-primary: #121212;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #222222;
+  --bg-card: #1e1e1e;
+  --text-primary: #ffffff;
+  --text-secondary: #bbbbbb;
+  --text-tertiary: #888888;
+  --accent-primary: #6a11cb;
+  --accent-secondary: #2575fc;
+  --accent-gradient: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+  --accent-color: #6a11cb;
+  --accent-color-transparent: rgba(106, 17, 203, 0.1);
+  --primary-color: #6a11cb;
+  --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --success-color: #4caf50;
+  --error-color: #f44336;
+  --error-color-rgb: 244, 67, 54;
+  --warning-color: #ff9800;
+}
+
+[data-theme="light"] {
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #d6d6d6;
+  --bg-tertiary: #9f9f9f;
+  --bg-card: #7f7f7f;
+  --text-primary: #202020;
+  --text-secondary: #505050;
+  --text-tertiary: #707070;
+  --accent-primary: #6a11cb;
+  --accent-secondary: #2575fc;
+  --accent-gradient: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+  --accent-color: #6a11cb;
+  --accent-color-transparent: rgba(106, 17, 203, 0.1);
+  --primary-color: #6a11cb;
+  --primary-color-rgb: 106, 17, 203;
+  --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  --border-color: rgba(0, 0, 0, 0.1);
+  --success-color: #4caf50;
+  --error-color: #f44336;
+  --error-color-rgb: 244, 67, 54;
+  --warning-color: #ff9800;
+}
+
+/* Transitions for theme switching */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Subtle geometric patterns */
+.geometric-bg-1 {
+  background-image: 
+    linear-gradient(rgba(106, 17, 203, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(106, 17, 203, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: center center;
+}
+
+.geometric-bg-2 {
+  position: relative;
+  overflow: hidden;
+}
+
+.geometric-bg-2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 100% 0%, rgba(106, 17, 203, 0.05) 0, transparent 25%),
+    radial-gradient(circle at 0% 100%, rgba(37, 117, 252, 0.05) 0, transparent 25%);
+  z-index: -1;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+}
+
+.theme-toggle:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
+} 

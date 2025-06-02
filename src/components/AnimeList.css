@@ -1,0 +1,691 @@
+.anime-list-container {
+  padding: 20px 0;
+  position: relative;
+}
+
+.anime-list-container.geometric-bg-1 {
+  position: relative;
+  overflow: hidden;
+}
+
+.section-title {
+  margin-bottom: 24px;
+  font-size: 1.8rem;
+  font-weight: 600;
+  text-align: left;
+  color: var(--text-primary);
+  position: relative;
+  display: inline-block;
+}
+
+.section-title::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background: var(--accent-gradient);
+  border-radius: 3px;
+}
+
+/* Style par défaut pour mobile: 2 colonnes */
+.anime-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur mobile */
+  gap: 15px;
+}
+
+/* Media queries pour les écrans plus grands */
+@media (min-width: 576px) {
+  .anime-grid {
+    grid-template-columns: repeat(3, 1fr); /* 3 colonnes sur tablette */
+    gap: 20px;
+  }
+}
+
+@media (min-width: 768px) {
+  .anime-grid {
+    grid-template-columns: repeat(4, 1fr); /* 4 colonnes sur petit desktop */
+    gap: 25px;
+  }
+}
+
+@media (min-width: 992px) {
+  .anime-grid {
+    grid-template-columns: repeat(5, 1fr); /* 5 colonnes sur desktop moyen */
+  }
+}
+
+@media (min-width: 1200px) {
+  .anime-grid {
+    grid-template-columns: repeat(6, 1fr); /* 6 colonnes sur grand écran */
+  }
+}
+
+/* Styles spécifiques pour mobile */
+@media (max-width: 575px) {
+  .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .anime-grid {
+    gap: 12px; /* Espacement plus petit sur mobile */
+  }
+}
+
+.anime-grid-item {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.anime-grid-item:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--hover-shadow);
+}
+
+.loading-container, .error-container {
+  padding: 40px;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.error-container {
+  color: var(--error-color);
+}
+
+.loading-more-container {
+  margin: 30px 0;
+  width: 100%;
+}
+
+.loading-more {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: var(--text-tertiary);
+}
+
+.no-more-results {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: var(--text-tertiary);
+  border-top: 1px solid var(--border-color);
+  margin-top: 30px;
+}
+
+.no-anime-container {
+  padding: 40px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.no-anime-message {
+  text-align: center;
+  padding: 30px;
+  background-color: var(--bg-secondary);
+  border-radius: 16px;
+  max-width: 500px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+}
+
+.no-anime-message h2 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: var(--text-primary);
+}
+
+.no-anime-message p {
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.retry-button {
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.retry-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Styles pour le header et le bouton de filtre */
+.anime-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Styles pour le menu de tri */
+.sort-container {
+  position: relative;
+}
+
+.sort-toggle-button {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-toggle-button:hover {
+  background-color: var(--accent-color-transparent);
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.sort-toggle-button svg {
+  stroke: currentColor;
+}
+
+.sort-label {
+  white-space: nowrap;
+}
+
+.sort-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-color);
+  z-index: 100;
+  min-width: 180px;
+  max-height: 300px;
+  overflow-y: auto;
+  animation: fade-in 0.2s ease-out;
+}
+
+.sort-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.sort-option:last-child {
+  border-bottom: none;
+}
+
+.sort-option:hover {
+  background-color: var(--bg-secondary);
+}
+
+.sort-option.active {
+  color: var(--accent-color);
+  font-weight: 500;
+  background-color: rgba(var(--primary-color-rgb), 0.05);
+}
+
+.check-icon {
+  stroke: var(--accent-color);
+}
+
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Styles pour la barre de recherche */
+.search-toggle-button {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.search-toggle-button:hover {
+  background-color: var(--accent-color-transparent);
+  color: var(--accent-color);
+}
+
+.search-toggle-button svg {
+  stroke: currentColor;
+}
+
+.search-bar-container {
+  position: absolute;
+  right: calc(100% + 5px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  animation: slide-in 0.3s ease-out forwards;
+}
+
+.search-form {
+  display: flex;
+  position: relative;
+}
+
+.search-input {
+  padding: 8px 40px 8px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  width: 200px;
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  width: 250px;
+}
+
+.search-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  padding: 0 12px;
+  background-color: transparent;
+  border: none;
+  color: var(--accent-color);
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 0 20px 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-button:hover {
+  background-color: rgba(var(--primary-color-rgb), 0.1);
+}
+
+.clear-search-button {
+  position: absolute;
+  right: 35px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 2px;
+  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clear-search-button:hover {
+  color: var(--error-color);
+}
+
+.active-search-query {
+  background-color: var(--bg-secondary);
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.clear-search-button-inline {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-search-button-inline:hover {
+  background-color: rgba(var(--error-color-rgb), 0.1);
+  color: var(--error-color);
+  border-color: var(--error-color);
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+.filter-toggle-button {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.filter-toggle-button:hover {
+  background-color: var(--accent-color-transparent);
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.filter-icon {
+  margin-left: 8px;
+  font-size: 0.8rem;
+}
+
+/* Media query pour mobile */
+@media (max-width: 768px) {
+  .anime-list-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .header-controls {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .sort-container {
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  
+  .sort-toggle-button {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .sort-menu {
+    width: 100%;
+    left: 0;
+    right: auto;
+  }
+  
+  .search-container {
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  
+  .search-bar-container {
+    position: relative;
+    left: 0;
+    transform: none;
+    top: 0;
+    width: calc(100% - 50px);
+    margin-left: 10px;
+    animation: slide-down 0.3s ease-out forwards;
+  }
+  
+  .search-form {
+    width: 100%;
+  }
+  
+  .search-input {
+    width: 100%;
+  }
+  
+  .search-input:focus {
+    width: 100%;
+  }
+  
+  .filter-toggle-button {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  @keyframes slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .genre-buttons {
+    gap: 6px;
+  }
+  
+  .genre-button {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+  }
+  
+  .filter-actions {
+    align-items: center;
+  }
+  
+  .reset-filters-button {
+    width: 100%;
+  }
+}
+
+/* Styles pour le conteneur de filtres */
+.genre-filter-container {
+  background-color: var(--bg-secondary);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+}
+
+.loading-genres {
+  text-align: center;
+  padding: 15px;
+  font-style: italic;
+  color: var(--text-tertiary);
+}
+
+.filter-section {
+  margin-bottom: 20px;
+}
+
+.filter-section h3 {
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  position: relative;
+  display: inline-block;
+}
+
+.filter-section h3::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background: var(--accent-gradient);
+  border-radius: 2px;
+}
+
+/* Style des boutons de genre */
+.genre-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.genre-button {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.genre-button:hover {
+  background-color: var(--accent-color-transparent);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+/* Styles pour les états des boutons */
+.genre-button.include {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #388e3c;
+  border-color: #4caf50;
+}
+
+.genre-button.include:hover {
+  background-color: rgba(76, 175, 80, 0.3);
+}
+
+.genre-button.exclude {
+  background-color: rgba(244, 67, 54, 0.2);
+  color: #d32f2f;
+  border-color: var(--error-color);
+}
+
+.genre-button.exclude:hover {
+  background-color: rgba(244, 67, 54, 0.3);
+}
+
+/* Légende des filtres */
+.filter-legend {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+
+.filter-legend-item {
+  display: flex;
+  align-items: center;
+}
+
+.filter-legend-item::before {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.filter-legend-item.neutral::before {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+.filter-legend-item.include::before {
+  background-color: rgba(76, 175, 80, 0.2);
+  border: 1px solid #4caf50;
+}
+
+.filter-legend-item.exclude::before {
+  background-color: rgba(244, 67, 54, 0.2);
+  border: 1px solid var(--error-color);
+}
+
+/* Actions de filtre */
+.filter-actions {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 15px;
+}
+
+.reset-filters-button {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: flex-start;
+}
+
+.reset-filters-button:hover {
+  background-color: rgba(var(--error-color-rgb), 0.1);
+  color: var(--error-color);
+  border-color: var(--error-color);
+}
+
+.active-filters {
+  margin-top: 15px;
+}
+
+.filter-summary {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.filter-summary strong {
+  color: var(--text-primary);
+}
+
+.filter-summary .auto-excluded {
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+} 

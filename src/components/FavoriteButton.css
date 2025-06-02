@@ -1,0 +1,119 @@
+.favorite-button-container {
+  position: relative;
+  z-index: 10;
+}
+
+.favorite-button {
+  background-color: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  padding: 0;
+  backdrop-filter: blur(3px);
+}
+
+.favorite-button:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+  transform: scale(1.1);
+}
+
+.favorite-button.is-favorite {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.favorite-button.is-favorite:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.favorite-button.processing {
+  opacity: 0.7;
+  cursor: not-allowed;
+  animation: pulse 1s infinite;
+}
+
+.favorite-icon {
+  color: white;
+  font-size: 18px;
+  line-height: 0;
+}
+
+.favorite-button.is-favorite .favorite-icon {
+  color: gold;
+  text-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
+}
+
+.favorite-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  border-radius: 6px;
+  padding: 12px;
+  width: 220px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  animation: fade-in 0.3s ease-out;
+  z-index: 20;
+}
+
+.favorite-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 12px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+}
+
+.favorite-tooltip p {
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+}
+
+.tooltip-login-button {
+  background-color: #6a11cb;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tooltip-login-button:hover {
+  background-color: #7d21e0;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} 

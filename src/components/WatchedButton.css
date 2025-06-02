@@ -1,0 +1,102 @@
+.watched-button-container {
+  position: relative;
+}
+
+.watched-button {
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.watched-button:hover {
+  background: rgba(0, 0, 0, 0.6);
+  transform: scale(1.1);
+}
+
+.watched-button.is-watched {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.watched-button.is-watched:hover {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.watched-button.is-watched:hover svg {
+  fill: rgba(255, 255, 255, 0.8);
+}
+
+.watched-button.processing {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.watched-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.watched-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.watched-tooltip {
+  position: absolute;
+  bottom: 40px;
+  right: -10px;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 6px;
+  width: 220px;
+  font-size: 14px;
+  z-index: 10;
+  animation: fadeIn 0.3s;
+}
+
+.watched-tooltip:after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  right: 20px;
+  width: 10px;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.85);
+  transform: rotate(45deg);
+}
+
+.watched-tooltip p {
+  margin: 0 0 10px 0;
+}
+
+.tooltip-login-button {
+  background: #208cff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  transition: background-color 0.2s;
+}
+
+.tooltip-login-button:hover {
+  background: #0066cc;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+} 

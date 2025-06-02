@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String     @id @default(cuid())
+  username        String     @unique
+  email           String     @unique
+  password        String
+  createdAt       DateTime   @default(now())
+  isAdmin         Boolean    @default(false)
+  showNSFW        Boolean    @default(false)
+  nsfwAuthorized  Boolean    @default(false)
+  lastLogin       DateTime?
+  status          String     @default("active")
+  activity        Activity?
+  favorites       Favorite[]
+  watched         Watched[]
+  searches        Search[]
+}
+
+model Activity {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id])
+  logins     Int      @default(0)
+  searches   Int      @default(0)
+  lastActive DateTime @default(now())
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  animeId   Int
+  title     String
+  imageUrl  String
+  addedAt   DateTime @default(now())
+  rating    Int?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, animeId])
+}
+
+model Watched {
+  id              String   @id @default(cuid())
+  userId          String
+  animeId         Int
+  title           String
+  imageUrl        String
+  watchedAt       DateTime @default(now())
+  episodesWatched Int?
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, animeId])
+}
+
+model Search {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  query     String
+  timestamp DateTime @default(now())
+}

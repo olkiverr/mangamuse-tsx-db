@@ -1,0 +1,117 @@
+.anime-slider-container {
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.slider-title {
+  margin-bottom: 18px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  position: relative;
+  display: inline-block;
+  color: var(--text-primary);
+}
+
+.slider-title::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: var(--accent-gradient);
+  border-radius: 3px;
+}
+
+.slider-controls {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.anime-slider {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  padding: 15px 0;
+  gap: 20px;
+}
+
+.anime-slider::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.slider-item {
+  min-width: 200px;
+  width: 200px;
+  transition: transform 0.3s ease;
+}
+
+.slider-control {
+  position: absolute;
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--card-shadow);
+}
+
+.slider-control:hover {
+  background-color: var(--bg-secondary);
+  color: var(--accent-primary);
+  transform: scale(1.05);
+}
+
+.slider-control.prev {
+  left: 10px;
+}
+
+.slider-control.next {
+  right: 10px;
+}
+
+.slider-loading {
+  text-align: center;
+  padding: 40px 0;
+  font-style: italic;
+  color: var(--text-tertiary);
+}
+
+/* Optimisation pour mobile */
+@media (max-width: 575px) {
+  .anime-slider-container {
+    margin-bottom: 30px;
+  }
+  
+  .slider-title {
+    font-size: 1.3rem;
+    margin-bottom: 14px;
+  }
+  
+  .anime-slider {
+    gap: 12px;
+    padding: 10px 0;
+  }
+  
+  .slider-item {
+    min-width: 140px;
+    width: 140px;
+  }
+  
+  .slider-control {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+} 

@@ -1,0 +1,347 @@
+/* Styles communs pour les pages d'authentification */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
+}
+
+.auth-card {
+  background-color: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 30px;
+  width: 100%;
+  max-width: 450px;
+  border: 1px solid var(--border-color);
+}
+
+.auth-card h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.8rem;
+}
+
+.auth-error {
+  background-color: rgba(255, 76, 76, 0.1);
+  border-left: 4px solid #ff4c4c;
+  color: #ff4c4c;
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.auth-success {
+  background-color: rgba(46, 213, 115, 0.1);
+  border-left: 4px solid #2ed573;
+  color: #2ed573;
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.form-group input {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(106, 17, 203, 0.2);
+}
+
+.form-group input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.form-hint {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.auth-submit-button {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: #6a11cb;
+  color: white;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-size: 1rem;
+}
+
+.auth-submit-button:hover {
+  background-color: #7d21e0;
+}
+
+.auth-submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-cancel-button {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-size: 1rem;
+}
+
+.auth-cancel-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.auth-cancel-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-logout-button {
+  margin-top: 20px;
+  padding: 10px 15px;
+  border-radius: 6px;
+  background-color: rgba(255, 76, 76, 0.1);
+  color: #ff4c4c;
+  font-weight: 600;
+  border: 1px solid rgba(255, 76, 76, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-size: 0.9rem;
+}
+
+.auth-logout-button:hover {
+  background-color: rgba(255, 76, 76, 0.2);
+}
+
+.auth-links {
+  margin-top: 25px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.auth-link {
+  color: #6a11cb;
+  margin-left: 5px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+/* Styles pour la page de profil */
+.profile-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.profile-header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Tabs de navigation */
+.profile-tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.profile-tab {
+  padding: 8px 16px;
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--text-secondary);
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-size: 0.9rem;
+}
+
+.profile-tab:hover {
+  background-color: rgba(var(--primary-color-rgb), 0.05);
+  color: var(--primary-color);
+}
+
+.profile-tab.active {
+  background-color: rgba(var(--primary-color-rgb), 0.1);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.profile-edit-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  background-color: transparent;
+  color: #6a11cb;
+  font-weight: 600;
+  border: 1px solid #6a11cb;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-size: 0.9rem;
+  position: absolute;
+  right: 25px;
+  top: 25px;
+}
+
+.profile-edit-button:hover {
+  background-color: rgba(106, 17, 203, 0.1);
+}
+
+.profile-card {
+  background-color: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  margin-bottom: 30px;
+  border: 1px solid var(--border-color);
+  position: relative;
+}
+
+/* Section mot de passe */
+.password-section .profile-card h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.profile-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.profile-label {
+  font-size: 0.9rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.profile-value {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Favoris */
+.favorite-animes-section {
+  margin-top: 40px;
+}
+
+.favorite-animes-section h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 20px;
+}
+
+.favorite-anime-card {
+  height: 100%;
+}
+
+.no-favorites {
+  background-color: var(--bg-tertiary);
+  border-radius: 12px;
+  padding: 25px;
+  text-align: center;
+  color: var(--text-tertiary);
+  border: 1px dashed var(--border-color);
+}
+
+.no-favorites p:first-child {
+  margin-top: 0;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.loading-favorites {
+  padding: 40px 0;
+  text-align: center;
+}
+
+/* Adaptation mobile */
+@media (max-width: 600px) {
+  .auth-card {
+    padding: 20px;
+  }
+  
+  .profile-actions {
+    flex-direction: column;
+  }
+  
+  .favorites-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+} 

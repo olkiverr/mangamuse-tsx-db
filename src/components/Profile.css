@@ -1,0 +1,41 @@
+.watched-animes-section {
+  margin-top: 30px;
+}
+
+.watched-animes-section h3 {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+.watched-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.watched-anime-card {
+  height: 100%;
+}
+
+.no-watched {
+  background-color: var(--bg-tertiary);
+  border-radius: 12px;
+  padding: 25px;
+  text-align: center;
+  color: var(--text-tertiary);
+  border: 1px dashed var(--border-color);
+}
+
+.no-watched p:first-child {
+  margin-top: 0;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.loading-watched {
+  padding: 40px 0;
+  text-align: center;
+} 
