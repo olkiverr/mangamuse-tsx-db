@@ -17,6 +17,7 @@ import {
   AuthResponse
 } from '../services/authService';
 import type { User } from '../types';
+import { logger } from '../utils/logger';
 
 // Définir le type pour le contexte
 interface AuthContextType {
@@ -81,7 +82,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const currentUser = getCurrentUser();
         setUser(currentUser);
       } catch (error) {
-        console.error("Error loading user:", error);
+        logger.error("Error loading user:", error);
       } finally {
         setIsLoading(false);
       }
@@ -116,7 +117,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Mettre à jour le profil
   const updateProfile = async (userId: string, updates: Partial<User>): Promise<AuthResponse> => {
-    const response = authUpdateProfile(userId, updates);
+    const response = await authUpdateProfile(userId, updates);
     if (response.success && response.user && user?.id === userId) {
       setUser(response.user);
     }
@@ -130,12 +131,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     
     try {
-      console.log('Avant toggleFavorite - Favoris actuels:', user.favorites);
       const response = await authToggleFavorite(animeId, title, imageUrl);
-      console.log('Réponse de toggleFavorite:', response);
       
       if (response.success && response.user) {
-        console.log('Mise à jour de l\'utilisateur avec les nouveaux favoris:', response.user.favorites);
         setUser(response.user);
         // Mettre à jour le localStorage
         localStorage.setItem('mangamuse_current_user', JSON.stringify(response.user));
@@ -143,7 +141,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       return { success: false, message: response.message || "Erreur lors de la mise à jour des favoris" };
     } catch (error) {
-      console.error('Erreur dans toggleFavorite:', error);
       return { success: false, message: "Erreur lors de la mise à jour des favoris" };
     }
   };
@@ -153,8 +150,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!user || !user.favorites) {
       return false;
     }
-    console.log('Vérification des favoris pour animeId:', animeId);
-    console.log('Liste des favoris:', user.favorites);
     
     // Vérifier si l'anime est dans les favoris (soit comme ID, soit comme objet)
     return user.favorites.some(fav => {
@@ -172,12 +167,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     
     try {
-      console.log('Avant toggleWatched - Animes vus actuels:', user.watched);
       const response = await authToggleWatched(animeId, title, imageUrl);
-      console.log('Réponse de toggleWatched:', response);
       
       if (response.success && response.user) {
-        console.log('Mise à jour de l\'utilisateur avec les nouveaux animes vus:', response.user.watched);
         setUser(response.user);
         // Mettre à jour le localStorage
         localStorage.setItem('mangamuse_current_user', JSON.stringify(response.user));
@@ -185,7 +177,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       return { success: false, message: response.message || "Erreur lors de la mise à jour des animes vus" };
     } catch (error) {
-      console.error('Erreur dans toggleWatched:', error);
       return { success: false, message: "Erreur lors de la mise à jour des animes vus" };
     }
   };
@@ -195,8 +186,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!user || !user.watched) {
       return false;
     }
-    console.log('Vérification des animes vus pour animeId:', animeId);
-    console.log('Liste des animes vus:', user.watched);
     
     // Vérifier si l'anime est dans les vus (soit comme ID, soit comme objet)
     return user.watched.some(watched => {
@@ -235,7 +224,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Basculer l'option NSFW
   const toggleNSFW = async (): Promise<AuthResponse> => {
     if (!user) {
-      console.error("toggleNSFW: Tentative de toggle sans utilisateur connecté");
       return { success: false, message: "Vous devez être connecté pour modifier vos préférences" };
     }
     
@@ -243,26 +231,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const currentValue = Boolean(user.showNSFW);
     const newNSFWValue = !currentValue;
     
-    console.log(`toggleNSFW: État actuel=${currentValue}, nouvelle valeur=${newNSFWValue}`);
-    
     const updates: Partial<User> = {
       showNSFW: newNSFWValue
     };
     
     try {
       const response = await authUpdateProfile(user.id, updates);
-      console.log(`toggleNSFW: Résultat de la mise à jour:`, response);
       
       if (response.success && response.user) {
-        console.log(`toggleNSFW: Mise à jour réussie, nouvel état showNSFW=${response.user.showNSFW}`);
         setUser(response.user);
         return { success: true, message: "Préférences NSFW mises à jour avec succès", user: response.user };
       } else {
-        console.error(`toggleNSFW: Échec de la mise à jour:`, response.message);
         return { success: false, message: response.message || "Erreur lors de la mise à jour des préférences" };
       }
     } catch (error) {
-      console.error("toggleNSFW: Error during update:", error);
       return { success: false, message: "Une erreur est survenue lors de la mise à jour des préférences" };
     }
   };

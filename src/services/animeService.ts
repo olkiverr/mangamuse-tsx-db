@@ -142,7 +142,6 @@ export interface AnimeGenreResponse {
 const handleApiRequest = async (url: string, retryCount = 0): Promise<any> => {
   // Check if we have a valid cached response
   if (apiCache[url] && (Date.now() - apiCache[url].timestamp) < CACHE_DURATION_MS) {
-    console.log(`Using cached data for: ${url}`);
     return apiCache[url].data;
   }
   
@@ -157,7 +156,6 @@ const handleApiRequest = async (url: string, retryCount = 0): Promise<any> => {
   
   try {
     lastApiCallTime = Date.now();
-    console.log(`Making API request to: ${url}`);
     const response = await fetch(url);
     
     // Handle rate limiting (429 Too Many Requests)
@@ -165,9 +163,6 @@ const handleApiRequest = async (url: string, retryCount = 0): Promise<any> => {
       const retryAfter = response.headers.get('Retry-After') || '2';
       const waitTime = parseInt(retryAfter) * 1000 || 2000;
       
-      console.warn(`Rate limited! Waiting for ${waitTime}ms before retrying (attempt ${retryCount + 1})`);
-      
-      // Exponential backoff with maximum 3 retries instead of 5
       if (retryCount >= 3) {
         throw new Error('Maximum retry attempts reached for rate-limited request');
       }
@@ -190,7 +185,6 @@ const handleApiRequest = async (url: string, retryCount = 0): Promise<any> => {
     
     return data;
   } catch (error) {
-    console.error("Error fetching anime data:", error);
     throw error;
   }
 };
@@ -211,7 +205,6 @@ const sequentialApiCall = async <T>(apiCallFn: () => Promise<T>): Promise<T> => 
 
 export const fetchGenres = async (): Promise<AnimeGenreResponse> => {
   const apiUrl = `https://api.jikan.moe/v4/genres/anime`;
-  console.log(`Fetching anime genres from: ${apiUrl}`);
   return sequentialApiCall(() => 
     handleApiRequest(apiUrl)
   );
@@ -250,7 +243,6 @@ export const fetchAnimes = async (
     apiUrl += `&q=${encodeURIComponent(searchQuery.trim())}`;
   }
   
-  console.log(`fetchAnimes with showNSFW=${showNSFW}, nsfwAuthorized=${nsfwAuthorized}, canShowNSFW=${canShowNSFW}, URL: ${apiUrl}`);
   return sequentialApiCall(() => 
     handleApiRequest(apiUrl)
   );
@@ -269,7 +261,6 @@ export const fetchTrendingAnimes = async (
     apiUrl += `&sfw=true`;
   }
   
-  console.log(`fetchTrendingAnimes avec showNSFW=${showNSFW}, nsfwAuthorized=${nsfwAuthorized}, canShowNSFW=${canShowNSFW}, URL: ${apiUrl}`);
   return sequentialApiCall(() => 
     handleApiRequest(apiUrl)
   );
@@ -288,7 +279,6 @@ export const fetchUpcomingAnimes = async (
     apiUrl += `&sfw=true`;
   }
   
-  console.log(`fetchUpcomingAnimes avec showNSFW=${showNSFW}, nsfwAuthorized=${nsfwAuthorized}, canShowNSFW=${canShowNSFW}, URL: ${apiUrl}`);
   return sequentialApiCall(() => 
     handleApiRequest(apiUrl)
   );
@@ -327,7 +317,6 @@ export const fetchMoreAnimes = async (
     apiUrl += `&q=${encodeURIComponent(searchQuery.trim())}`;
   }
   
-  console.log(`fetchMoreAnimes avec showNSFW=${showNSFW}, nsfwAuthorized=${nsfwAuthorized}, canShowNSFW=${canShowNSFW}, URL: ${apiUrl}`);
   return sequentialApiCall(() => 
     handleApiRequest(apiUrl)
   );
@@ -448,7 +437,6 @@ export const fetchAdvancedSearch = async (params: AdvancedSearchParams): Promise
     apiUrl += `&end_date=${endDate}`;
   }
 
-  console.log(`Advanced search with URL: ${apiUrl}`);
   return sequentialApiCall(() => 
     handleApiRequest(apiUrl)
   );
@@ -456,7 +444,6 @@ export const fetchAdvancedSearch = async (params: AdvancedSearchParams): Promise
 
 export const fetchProducers = async (): Promise<{data: {mal_id: number, name: string}[]}> => {
   const apiUrl = `https://api.jikan.moe/v4/producers`;
-  console.log(`Fetching anime producers from: ${apiUrl}`);
   return sequentialApiCall(() => 
     handleApiRequest(apiUrl)
   );
@@ -500,7 +487,6 @@ export const fetchRandomAnimeWithFilters = async (params: AdvancedSearchParams):
     const randomIndex = Math.floor(Math.random() * filteredResponse.data.length);
     return filteredResponse.data[randomIndex].mal_id;
   } catch (error) {
-    console.error("Error fetching random anime with filters:", error);
     throw error;
   }
 };

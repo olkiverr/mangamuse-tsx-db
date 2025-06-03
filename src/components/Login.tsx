@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { logger } from '../utils/logger';
 import './Auth.css';
 
 const Login: React.FC = () => {
@@ -33,7 +34,7 @@ const Login: React.FC = () => {
       }
     } catch (err) {
       setError('An error occurred during login');
-      console.error('Login error:', err);
+      logger.error('Login error:', err);
     } finally {
       setIsSubmitting(false);
     }

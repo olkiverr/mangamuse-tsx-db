@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { fetchAnimes, fetchMoreAnimes, fetchGenres, Anime, AnimeGenre } from '../services/animeService';
 import { useAuth } from '../contexts/AuthContext';
+import { logger } from '../utils/logger';
 import AnimeCard from './AnimeCard';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorPage from './ErrorPage';
@@ -60,7 +61,7 @@ const AnimeList: React.FC = () => {
   const canShowNSFW = useMemo(() => showNSFW && nsfwAuthorized, [showNSFW, nsfwAuthorized]);
 
   useEffect(() => {
-    console.log(`AnimeList: Préférence NSFW détectée: ${showNSFW}, Autorisation NSFW: ${nsfwAuthorized}, Peut voir NSFW: ${canShowNSFW}, utilisateur:`, user);
+    // Suppression de tous les console.log
   }, [showNSFW, nsfwAuthorized, canShowNSFW, user]);
 
   // Focus sur l'input de recherche quand il devient visible
@@ -91,7 +92,7 @@ const AnimeList: React.FC = () => {
           setDisplayedGenres(sortedGenres);
         }
       } catch (err) {
-        console.error("Error loading genres:", err);
+        logger.error("Error loading genres:", err);
       } finally {
         setLoadingGenres(false);
       }
@@ -146,7 +147,6 @@ const AnimeList: React.FC = () => {
   const loadAnimes = useCallback(async (pageNum: number) => {
     // Prevent concurrent loads of the same page
     if (isLoadingRef.current) {
-      console.log(`Already loading page ${pageNum}, skipping duplicate request`);
       return;
     }
     
@@ -162,11 +162,9 @@ const AnimeList: React.FC = () => {
         isInitialLoad.current = false;
       }
       
-      console.log(`Loading animes for page ${pageNum} with showNSFW=${showNSFW}, nsfwAuthorized=${nsfwAuthorized}, selectedGenres=${selectedGenres}, excludedGenres=${effectiveExcludedGenres}, search=${searchQuery}, sortBy=${sortBy}`);
       const response = await (pageNum === 1 
         ? fetchAnimes(pageNum, showNSFW, selectedGenres, effectiveExcludedGenres, searchQuery, sortBy, nsfwAuthorized) 
         : fetchMoreAnimes(pageNum, showNSFW, selectedGenres, effectiveExcludedGenres, searchQuery, sortBy, nsfwAuthorized));
-      console.log(`Received ${response.data.length} animes for page ${pageNum}`);
       
       // Filter duplicates more efficiently with Set operations
       const newAnimes = response.data.filter(anime => {
@@ -177,8 +175,6 @@ const AnimeList: React.FC = () => {
         return !isDuplicate;
       });
       
-      console.log(`After filtering, ${newAnimes.length} new animes remain`);
-      
       if (pageNum === 1) {
         setAnimes(newAnimes);
       } else {
@@ -188,11 +184,9 @@ const AnimeList: React.FC = () => {
       // Only set hasMore to false if we're really at the end of pagination
       // and not just because we filtered out all duplicates
       const hasNextPage = response.pagination.has_next_page;
-      console.log(`API reports has_next_page: ${hasNextPage}`);
       
       // If we received data but filtered everything as duplicates, try next page immediately
       if (newAnimes.length === 0 && response.data.length > 0 && hasNextPage) {
-        console.log("All animes were duplicates, trying next page");
         setTimeout(() => {
           setPage(pageNum + 1);
         }, 500); // Reduced from 1000ms to 500ms
@@ -203,7 +197,6 @@ const AnimeList: React.FC = () => {
       initialLoadAttempted.current = true;
     } catch (err) {
       setError("An error occurred while fetching anime. This might be due to API rate limits. Please try again later.");
-      console.error(err);
       initialLoadAttempted.current = true;
     } finally {
       setIsLoading(false);
@@ -292,7 +285,6 @@ const AnimeList: React.FC = () => {
       if (entries[0].isIntersecting && hasMore && !isLoadingRef.current) {
         // Add a small delay before loading more to avoid hitting rate limits
         setTimeout(() => {
-          console.log("Intersection observed, loading next page");
           setPage(prevPage => prevPage + 1);
         }, 1000);
       }

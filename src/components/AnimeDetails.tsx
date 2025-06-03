@@ -9,6 +9,7 @@ import {
   StaffMember
 } from '../services/animeService';
 import { useAuth } from '../contexts/AuthContext';
+import { logger } from '../utils/logger';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorPage from './ErrorPage';
 import FavoriteButton from './FavoriteButton';
@@ -41,7 +42,7 @@ const AnimeDetails: React.FC = () => {
       setAnime(response.data);
     } catch (err) {
       setError("An error occurred while retrieving anime details. Please try again later.");
-      console.error(err);
+      logger.error(err);
     } finally {
       setLoading(false);
     }
@@ -58,7 +59,7 @@ const AnimeDetails: React.FC = () => {
       setCharacters(response.data);
     } catch (err) {
       setCharactersError("Unable to load characters.");
-      console.error("Error loading characters:", err);
+      logger.error("Error loading characters:", err);
     } finally {
       setLoadingCharacters(false);
     }
@@ -75,7 +76,7 @@ const AnimeDetails: React.FC = () => {
       setStaff(response.data);
     } catch (err) {
       setStaffError("Unable to load staff.");
-      console.error("Error loading staff:", err);
+      logger.error("Error loading staff:", err);
     } finally {
       setLoadingStaff(false);
     }

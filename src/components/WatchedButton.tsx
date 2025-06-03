@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { FaEye, FaRegEye } from 'react-icons/fa';
+import { logger } from '../utils/logger';
 import './WatchedButton.css';
 
 interface WatchedButtonProps {
@@ -36,7 +37,7 @@ const WatchedButton: React.FC<WatchedButtonProps> = ({ animeId, title, imageUrl 
         setIsWatchedState(!isWatchedState);
       }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour des animes vus:', error);
+      logger.error('Erreur lors de la mise à jour des animes vus:', error);
     } finally {
       setIsProcessing(false);
     }

@@ -14,6 +14,7 @@ import LoadingSpinner from './LoadingSpinner';
 import ErrorPage from './ErrorPage';
 import AnimeCard from './AnimeCard';
 import './AdvancedSearch.css';
+import { logger } from '../utils/logger';
 
 // Constants for filter options
 const TYPE_OPTIONS = [
@@ -136,7 +137,7 @@ const AdvancedSearch: React.FC = () => {
           setDisplayedGenres(sortedGenres);
         }
       } catch (err) {
-        console.error("Error loading genres:", err);
+        logger.error("Error loading genres:", err);
       } finally {
         setLoadingGenres(false);
       }
@@ -155,7 +156,7 @@ const AdvancedSearch: React.FC = () => {
         setProducers(sortedProducers);
         setFilteredProducers(sortedProducers);
       } catch (err) {
-        console.error("Error loading producers:", err);
+        logger.error("Error loading producers:", err);
       } finally {
         setLoadingProducers(false);
         setInitialLoading(false);
@@ -222,7 +223,7 @@ const AdvancedSearch: React.FC = () => {
       setHasMore(response.pagination.has_next_page);
       setHasSearched(true);
     } catch (err) {
-      console.error("Error performing search:", err);
+      logger.error("Error performing search:", err);
       setError("An error occurred while searching. This might be due to API rate limits. Please try again later.");
     } finally {
       setIsLoading(false);
@@ -254,7 +255,7 @@ const AdvancedSearch: React.FC = () => {
       const animeId = await fetchRandomAnimeWithFilters(params);
       navigate(`/anime/${animeId}`);
     } catch (err: any) {
-      console.error("Error searching for random anime:", err);
+      logger.error("Error searching for random anime:", err);
       setError(err.message || "An error occurred while searching for a random anime. Please try again.");
     } finally {
       setIsLoading(false);

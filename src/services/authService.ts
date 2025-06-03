@@ -1,4 +1,5 @@
 import { User } from '../types';
+import { logger } from '../utils/logger';
 
 // Types pour le système d'authentification
 export interface AuthResponse {
@@ -119,7 +120,7 @@ export const changePassword = async (
         const errorData = await response.json();
         errorMessage = errorData.message || errorMessage;
       } catch (e) {
-        console.error("Impossible de parser la réponse d'erreur:", e);
+        // Suppression du console.error
       }
       return { success: false, message: errorMessage };
     }
@@ -173,7 +174,7 @@ export const adminChangePassword = async (
         const errorData = await response.json();
         errorMessage = errorData.message || errorMessage;
       } catch (e) {
-        console.error("Impossible de parser la réponse d'erreur:", e);
+        // Suppression du console.error
       }
       return { success: false, message: errorMessage };
     }
@@ -259,7 +260,7 @@ export const updateProfile = async (
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes timeout
 
   try {
-    console.log('Envoi de la requête updateProfile:', {
+    logger.log('Envoi de la requête updateProfile:', {
       userId,
       updates
     });
@@ -276,7 +277,7 @@ export const updateProfile = async (
 
     clearTimeout(timeoutId);
 
-    console.log('Réponse du serveur (profile):', {
+    logger.log('Réponse du serveur (profile):', {
       status: response.status,
       statusText: response.statusText,
       headers: Object.fromEntries(response.headers.entries())
@@ -287,26 +288,26 @@ export const updateProfile = async (
       try {
         const errorData = await response.json();
         errorMessage = errorData.message || errorMessage;
-        console.error('Détails de l\'erreur (profile):', errorData);
+        logger.error('Détails de l\'erreur (profile):', errorData);
       } catch (e) {
-        console.error('Impossible de parser la réponse d\'erreur (profile):', e);
+        logger.error('Impossible de parser la réponse d\'erreur (profile):', e);
       }
       throw new Error(errorMessage);
     }
 
     const data = await response.json();
-    console.log('Données reçues (profile):', data);
+    logger.log('Données reçues (profile):', data);
 
     // Si nous recevons directement les données de l'utilisateur
     if (data.user) {
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(data.user));
       return { success: true, message: data.message || "Profil mis à jour avec succès", user: data.user };
-  }
+    }
   
     return { success: false, message: data.message || "Erreur lors de la mise à jour du profil" };
   } catch (error) {
     clearTimeout(timeoutId);
-    console.error('Erreur détaillée lors de la mise à jour du profil:', {
+    logger.error('Erreur détaillée lors de la mise à jour du profil:', {
       error,
       name: error instanceof Error ? error.name : 'Unknown',
       message: error instanceof Error ? error.message : 'Unknown error',
@@ -316,7 +317,7 @@ export const updateProfile = async (
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
         return { success: false, message: "La requête a expiré. Veuillez réessayer." };
-  }
+      }
       return { success: false, message: error.message };
     }
     return { success: false, message: "Erreur lors de la mise à jour du profil" };
@@ -334,7 +335,7 @@ export const toggleFavorite = async (animeId: number, title: string, imageUrl: s
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes timeout
 
-  console.log('Tentative de mise à jour des favoris:', {
+  logger.log('Tentative de mise à jour des favoris:', {
     userId,
     animeId,
     title,
@@ -355,7 +356,7 @@ export const toggleFavorite = async (animeId: number, title: string, imageUrl: s
 
     clearTimeout(timeoutId);
 
-    console.log('Réponse du serveur:', {
+    logger.log('Réponse du serveur:', {
       status: response.status,
       statusText: response.statusText,
       headers: Object.fromEntries(response.headers.entries())
@@ -366,15 +367,15 @@ export const toggleFavorite = async (animeId: number, title: string, imageUrl: s
       try {
         const errorData = await response.json();
         errorMessage = errorData.message || errorMessage;
-        console.error('Détails de l\'erreur:', errorData);
+        logger.error('Détails de l\'erreur:', errorData);
       } catch (e) {
-        console.error('Impossible de parser la réponse d\'erreur:', e);
+        logger.error('Impossible de parser la réponse d\'erreur:', e);
       }
       throw new Error(errorMessage);
     }
 
     const data = await response.json();
-    console.log('Données reçues:', data);
+    logger.log('Données reçues:', data);
 
     // Si nous recevons directement les données de l'utilisateur
     if (data.id && data.username) {
@@ -391,7 +392,7 @@ export const toggleFavorite = async (animeId: number, title: string, imageUrl: s
     return { success: false, message: data.message || "Erreur lors de la mise à jour des favoris" };
   } catch (error) {
     clearTimeout(timeoutId);
-    console.error('Erreur détaillée lors de la mise à jour des favoris:', {
+    logger.error('Erreur détaillée lors de la mise à jour des favoris:', {
       error,
       name: error instanceof Error ? error.name : 'Unknown',
       message: error instanceof Error ? error.message : 'Unknown error',
@@ -431,7 +432,7 @@ export const toggleWatched = async (animeId: number, title: string, imageUrl: st
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes timeout
 
   try {
-    console.log('Envoi de la requête toggleWatched:', {
+    logger.log('Envoi de la requête toggleWatched:', {
       userId: user.id,
       animeId,
       title,
@@ -450,7 +451,7 @@ export const toggleWatched = async (animeId: number, title: string, imageUrl: st
 
     clearTimeout(timeoutId);
 
-    console.log('Réponse du serveur (watched):', {
+    logger.log('Réponse du serveur (watched):', {
       status: response.status,
       statusText: response.statusText,
       headers: Object.fromEntries(response.headers.entries())
@@ -461,15 +462,15 @@ export const toggleWatched = async (animeId: number, title: string, imageUrl: st
       try {
         const errorData = await response.json();
         errorMessage = errorData.message || errorMessage;
-        console.error('Détails de l\'erreur (watched):', errorData);
+        logger.error('Détails de l\'erreur (watched):', errorData);
       } catch (e) {
-        console.error('Impossible de parser la réponse d\'erreur (watched):', e);
+        logger.error('Impossible de parser la réponse d\'erreur (watched):', e);
       }
       throw new Error(errorMessage);
     }
 
     const data = await response.json();
-    console.log('Données reçues (watched):', data);
+    logger.log('Données reçues (watched):', data);
 
     // Si nous recevons directement les données de l'utilisateur
     if (data.id && data.username) {
@@ -486,7 +487,7 @@ export const toggleWatched = async (animeId: number, title: string, imageUrl: st
     return { success: false, message: data.message || "Erreur lors de la mise à jour des animes vus" };
   } catch (error) {
     clearTimeout(timeoutId);
-    console.error('Erreur détaillée lors de la mise à jour des animes vus:', {
+    logger.error('Erreur détaillée lors de la mise à jour des animes vus:', {
       error,
       name: error instanceof Error ? error.name : 'Unknown',
       message: error instanceof Error ? error.message : 'Unknown error',
@@ -574,7 +575,7 @@ export const deleteUser = async (userId: string): Promise<AuthResponse> => {
         const errorData = await response.json();
         errorMessage = errorData.message || errorMessage;
       } catch (e) {
-        console.error("Impossible de parser la réponse d'erreur:", e);
+        // Suppression du console.error
       }
       return { success: false, message: errorMessage };
     }
@@ -606,7 +607,7 @@ export const toggleUserNsfwAuthorization = async (
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes timeout
 
   try {
-    console.log('Envoi de la requête toggleUserNsfwAuthorization:', {
+    logger.log('Envoi de la requête toggleUserNsfwAuthorization:', {
       adminId: user.id,
       userId
     });
@@ -623,7 +624,7 @@ export const toggleUserNsfwAuthorization = async (
 
     clearTimeout(timeoutId);
 
-    console.log('Réponse du serveur (nsfw-authorization):', {
+    logger.log('Réponse du serveur (nsfw-authorization):', {
       status: response.status,
       statusText: response.statusText,
       headers: Object.fromEntries(response.headers.entries())
@@ -634,19 +635,19 @@ export const toggleUserNsfwAuthorization = async (
       try {
         const errorData = await response.json();
         errorMessage = errorData.message || errorMessage;
-        console.error('Détails de l\'erreur (nsfw):', errorData);
+        logger.error('Détails de l\'erreur (nsfw):', errorData);
       } catch (e) {
-        console.error('Impossible de parser la réponse d\'erreur (nsfw):', e);
+        logger.error('Impossible de parser la réponse d\'erreur (nsfw):', e);
       }
       throw new Error(errorMessage);
-  }
+    }
   
     const data = await response.json();
-    console.log('Données reçues (nsfw):', data);
+    logger.log('Données reçues (nsfw):', data);
 
     if (data.success && data.user) {
-  return {
-    success: true,
+      return {
+        success: true,
         message: data.message || "Permissions NSFW modifiées avec succès", 
         user: data.user 
       };
@@ -658,7 +659,7 @@ export const toggleUserNsfwAuthorization = async (
     };
   } catch (error) {
     clearTimeout(timeoutId);
-    console.error('Erreur détaillée lors de la modification des permissions NSFW:', {
+    logger.error('Erreur détaillée lors de la modification des permissions NSFW:', {
       error,
       name: error instanceof Error ? error.name : 'Unknown',
       message: error instanceof Error ? error.message : 'Unknown error',

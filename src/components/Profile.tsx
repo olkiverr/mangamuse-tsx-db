@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { logger } from '../utils/logger';
 import './Auth.css';
 import { fetchAnimeDetails, Anime } from '../services/animeService';
 import LoadingSpinner from './LoadingSpinner';
@@ -41,15 +42,11 @@ const Profile: React.FC = () => {
     
     setRefreshing(true);
     try {
-      console.log('Rafraîchissement des données utilisateur...');
       const response = await checkAuth(user.id);
       
       if (response.success && response.user) {
-        console.log('Données utilisateur rafraîchies avec succès');
-        // Mettre à jour les données dans localStorage
         localStorage.setItem('mangamuse_current_user', JSON.stringify(response.user));
         
-        // Forcer le rechargement des favoris et des vus
         if (response.user.favorites) {
           loadFavoriteAnimes(response.user);
         }
@@ -59,7 +56,7 @@ const Profile: React.FC = () => {
         }
       }
     } catch (error) {
-      console.error('Erreur lors du rafraîchissement des données utilisateur:', error);
+      logger.error('Erreur lors du rafraîchissement des données utilisateur:', error);
     } finally {
       setRefreshing(false);
     }
@@ -91,27 +88,22 @@ const Profile: React.FC = () => {
     const animes: Anime[] = [];
 
     try {
-      // Load details for each favorite anime
-      // To avoid API rate limiting, add a delay between requests
       for (const favorite of currentUser.favorites) {
         try {
-          // Extraire l'ID de l'anime de l'objet favorite
           const animeId = typeof favorite === 'object' ? (favorite as Favorite).animeId : favorite;
-          console.log('Loading favorite anime with ID:', animeId);
           
           const response = await fetchAnimeDetails(animeId);
           animes.push(response.data);
           
-          // Small pause between each request to avoid rate limiting issues
           await new Promise(resolve => setTimeout(resolve, 500));
         } catch (error) {
-          console.error(`Error loading anime ${favorite}:`, error);
+          logger.error(`Error loading anime ${favorite}:`, error);
         }
       }
       
       setFavoriteAnimes(animes);
     } catch (error) {
-      console.error("Error loading favorite animes:", error);
+      logger.error("Error loading favorite animes:", error);
     } finally {
       setLoadingFavorites(false);
     }
@@ -127,27 +119,22 @@ const Profile: React.FC = () => {
     const animes: Anime[] = [];
 
     try {
-      // Load details for each watched anime
-      // To avoid API rate limiting, add a delay between requests
       for (const watched of currentUser.watched) {
         try {
-          // Extraire l'ID de l'anime de l'objet watched
           const animeId = typeof watched === 'object' ? (watched as Favorite).animeId : watched;
-          console.log('Loading watched anime with ID:', animeId);
           
           const response = await fetchAnimeDetails(animeId);
           animes.push(response.data);
           
-          // Small pause between each request to avoid rate limiting issues
           await new Promise(resolve => setTimeout(resolve, 500));
         } catch (error) {
-          console.error(`Error loading anime ${watched}:`, error);
+          logger.error(`Error loading anime ${watched}:`, error);
         }
       }
       
       setWatchedAnimes(animes);
     } catch (error) {
-      console.error("Error loading watched animes:", error);
+      logger.error("Error loading watched animes:", error);
     } finally {
       setLoadingWatched(false);
     }
@@ -189,7 +176,6 @@ const Profile: React.FC = () => {
         email: email !== user.email ? email : undefined
       };
       
-      // Only update if something changed
       if (updates.username || updates.email) {
         const response = await updateProfile(user.id, updates);
         
@@ -216,7 +202,6 @@ const Profile: React.FC = () => {
     
     if (!user) return;
     
-    // Validation
     if (!currentPassword || !newPassword || !confirmPassword) {
       setError('Please fill in all fields');
       return;
@@ -241,7 +226,6 @@ const Profile: React.FC = () => {
       
       if (response.success) {
         setSuccess('Password changed successfully');
-        // Reset fields
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');

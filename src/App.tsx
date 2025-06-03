@@ -40,12 +40,9 @@ const Header: React.FC = () => {
   // Function to toggle NSFW option
   const handleToggleNSFW = async () => {
     if (isAuthenticated) {
-      console.log("Header: NSFW toggle clicked, current state:", user?.showNSFW);
       try {
         const result = await toggleNSFW();
-        console.log("Header: Result of NSFW toggle:", result);
       } catch (error) {
-        console.error("Header: Error toggling NSFW:", error);
       }
     }
   };
@@ -57,16 +54,8 @@ const Header: React.FC = () => {
       const animeId = await fetchRandomAnime(showNSFW, nsfwAuthorized);
       navigate(`/anime/${animeId}`);
     } catch (error) {
-      console.error("Error fetching random anime:", error);
     }
   };
-
-  // Log toggle state on each render
-  useEffect(() => {
-    if (isAuthenticated) {
-      console.log("Header: Current NSFW state =", user?.showNSFW);
-    }
-  }, [isAuthenticated, user?.showNSFW]);
 
   // Close popup when clicking outside
   useEffect(() => {
@@ -189,16 +178,10 @@ const HomePage: React.FC = () => {
   // Check if NSFW display is actually allowed
   const canShowNSFW = useMemo(() => showNSFW && nsfwAuthorized, [showNSFW, nsfwAuthorized]);
   
-  useEffect(() => {
-    console.log(`HomePage: NSFW preference detected: ${showNSFW}, NSFW Authorization: ${nsfwAuthorized}, Can view NSFW: ${canShowNSFW}, user:`, user);
-  }, [showNSFW, nsfwAuthorized, canShowNSFW, user]);
-
   const loadSlidersData = useCallback(async () => {
     try {
       setLoadingTrending(true);
       setLoadingUpcoming(true);
-      
-      console.log(`loadSlidersData: Loading with showNSFW=${showNSFW}, nsfwAuthorized=${nsfwAuthorized}, canShowNSFW=${canShowNSFW}`);
       
       // First, load trending anime
       const trendingResponse = await fetchTrendingAnimes(showNSFW, nsfwAuthorized);
@@ -236,7 +219,6 @@ const HomePage: React.FC = () => {
       setLoadingUpcoming(false);
     } catch (err) {
       setError("An error occurred while retrieving data. This may be due to API rate limits. Please refresh after a few seconds.");
-      console.error(err);
       setLoadingTrending(false);
       setLoadingUpcoming(false);
     }
@@ -291,7 +273,6 @@ const GlobalErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const handleError = (event: ErrorEvent) => {
-      console.error('Global error caught:', event.error);
       setHasError(true);
     };
 

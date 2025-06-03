@@ -137,7 +137,6 @@ const AdminPanel: React.FC = () => {
   // Fonction pour charger les utilisateurs
   const loadUsers = async () => {
     if (!user) {
-      console.error('Aucun utilisateur connecté');
       return;
     }
 
@@ -147,7 +146,6 @@ const AdminPanel: React.FC = () => {
       setUsers(users);
       generateDashboardStats(users);
     } catch (error) {
-      console.error('Erreur lors du chargement des utilisateurs:', error);
       setMessage({ text: 'Erreur lors du chargement des utilisateurs', type: 'error' });
     } finally {
       setLoading(false);
@@ -365,7 +363,6 @@ const AdminPanel: React.FC = () => {
       
       return animeData;
     } catch (error) {
-      console.error(`Error retrieving anime details ${animeId}:`, error);
       throw error;
     }
   };
@@ -376,7 +373,6 @@ const AdminPanel: React.FC = () => {
   const getUserDetails = async (userId: string): Promise<UserDetail> => {
     // Vérifier si les détails utilisateur sont déjà en cache
     if (userDetailsCache.current[userId]) {
-      console.log(`Using cached user details for ${userId}`);
       return userDetailsCache.current[userId];
     }
     
@@ -429,7 +425,6 @@ const AdminPanel: React.FC = () => {
           rating: Math.floor(Math.random() * 5) + 1
         });
       } catch (error) {
-        console.error(`Error fetching anime ${animeId}:`, error);
       }
     }
     
@@ -447,7 +442,6 @@ const AdminPanel: React.FC = () => {
           episodesWatched: Math.floor(Math.random() * animeDetails.data.episodes || 12) + 1
         });
       } catch (error) {
-        console.error(`Error fetching anime ${animeId}:`, error);
       }
     }
     
@@ -468,7 +462,6 @@ const AdminPanel: React.FC = () => {
       const userDetail = await getUserDetails(userId);
       setSelectedUser(userDetail);
     } catch (error) {
-      console.error("Error loading user details:", error);
       setMessage({ text: "An error occurred while loading user details", type: 'error' });
     } finally {
       setLoadingUserDetails(false);

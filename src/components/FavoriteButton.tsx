@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { logger } from '../utils/logger';
 import './FavoriteButton.css';
 
 interface FavoriteButtonProps {
@@ -37,7 +38,7 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({ animeId, title, imageUr
         setIsFav(!isFav);
       }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour des favoris:', error);
+      logger.error('Erreur lors de la mise à jour des favoris:', error);
     } finally {
       setIsProcessing(false);
     }
