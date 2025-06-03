@@ -89,74 +89,107 @@ const saveCurrentUser = (user: User): void => {
 };
 
 // Changer le mot de passe d'un utilisateur
-export const changePassword = (
+export const changePassword = async (
   userId: string,
   currentPassword: string,
   newPassword: string
-): AuthResponse => {
-  // Validation basique
-  if (!userId || !currentPassword || !newPassword) {
-    return { success: false, message: "Tous les champs sont obligatoires" };
+): Promise<AuthResponse> => {
+  try {
+    // Validation basique
+    if (!userId || !currentPassword || !newPassword) {
+      return { success: false, message: "Tous les champs sont obligatoires" };
+    }
+
+    if (newPassword.length < 6) {
+      return { success: false, message: "Le nouveau mot de passe doit contenir au moins 6 caractères" };
+    }
+
+    const response = await fetch(`${API_URL}/auth/password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'user-id': userId
+      },
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+
+    if (!response.ok) {
+      let errorMessage = 'Erreur lors du changement de mot de passe';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        console.error("Impossible de parser la réponse d'erreur:", e);
+      }
+      return { success: false, message: errorMessage };
+    }
+
+    const data = await response.json();
+    return {
+      success: true,
+      message: data.message || "Mot de passe changé avec succès"
+    };
+  } catch (error) {
+    console.error("Erreur lors du changement de mot de passe:", error);
+    if (error instanceof Error) {
+      return { success: false, message: error.message };
+    }
+    return { success: false, message: "Une erreur est survenue lors du changement de mot de passe" };
   }
-
-  if (newPassword.length < 6) {
-    return { success: false, message: "Le nouveau mot de passe doit contenir au moins 6 caractères" };
-  }
-
-  // Récupérer les mots de passe
-  const passwordsJson = localStorage.getItem(PASSWORDS_STORAGE_KEY) || '{}';
-  const passwords = JSON.parse(passwordsJson);
-
-  // Vérifier si l'utilisateur existe et si le mot de passe actuel est correct
-  if (!passwords[userId]) {
-    return { success: false, message: "Utilisateur non trouvé" };
-  }
-
-  if (passwords[userId] !== currentPassword) {
-    return { success: false, message: "Le mot de passe actuel est incorrect" };
-  }
-
-  // Mettre à jour le mot de passe
-  passwords[userId] = newPassword;
-  localStorage.setItem(PASSWORDS_STORAGE_KEY, JSON.stringify(passwords));
-
-  return {
-    success: true,
-    message: "Mot de passe changé avec succès"
-  };
 };
 
 // Changer le mot de passe d'un utilisateur (mode administrateur)
-export const adminChangePassword = (
+export const adminChangePassword = async (
   userId: string,
   newPassword: string
-): AuthResponse => {
-  // Validation basique
-  if (!userId || !newPassword) {
-    return { success: false, message: "Tous les champs sont obligatoires" };
+): Promise<AuthResponse> => {
+  try {
+    // Validation basique
+    if (!userId || !newPassword) {
+      return { success: false, message: "Tous les champs sont obligatoires" };
+    }
+
+    if (newPassword.length < 6) {
+      return { success: false, message: "Le nouveau mot de passe doit contenir au moins 6 caractères" };
+    }
+
+    const currentUser = getCurrentUser();
+    if (!currentUser || !currentUser.isAdmin) {
+      return { success: false, message: "Non autorisé" };
+    }
+
+    const response = await fetch(`${API_URL}/auth/admin-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'user-id': currentUser.id
+      },
+      body: JSON.stringify({ userId, newPassword })
+    });
+
+    if (!response.ok) {
+      let errorMessage = 'Erreur lors du changement de mot de passe';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        console.error("Impossible de parser la réponse d'erreur:", e);
+      }
+      return { success: false, message: errorMessage };
+    }
+
+    const data = await response.json();
+    return {
+      success: data.success,
+      message: data.message || "Mot de passe changé avec succès"
+    };
+  } catch (error) {
+    console.error("Erreur lors du changement de mot de passe:", error);
+    if (error instanceof Error) {
+      return { success: false, message: error.message };
+    }
+    return { success: false, message: "Une erreur est survenue lors du changement de mot de passe" };
   }
-
-  if (newPassword.length < 6) {
-    return { success: false, message: "Le nouveau mot de passe doit contenir au moins 6 caractères" };
-  }
-
-  // Récupérer les mots de passe
-  const passwordsJson = localStorage.getItem(PASSWORDS_STORAGE_KEY) || '{}';
-  const passwords = JSON.parse(passwordsJson);
-
-  // Vérifier si l'utilisateur existe
-  if (!passwords[userId]) {
-    return { success: false, message: "Utilisateur non trouvé" };
-  }
-
-  // Mettre à jour le mot de passe sans vérifier l'ancien
-  passwords[userId] = newPassword;
-  localStorage.setItem(PASSWORDS_STORAGE_KEY, JSON.stringify(passwords));
-
-  return {
-    success: true,
-    message: "Mot de passe changé avec succès"
-  };
 };
 
 // S'inscrire - créer un nouveau compte
@@ -221,7 +254,7 @@ export const updateProfile = async (
   if (!user) {
     return { success: false, message: "Utilisateur non connecté" };
   }
-
+  
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes timeout
 
@@ -268,8 +301,8 @@ export const updateProfile = async (
     if (data.user) {
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(data.user));
       return { success: true, message: data.message || "Profil mis à jour avec succès", user: data.user };
-    }
-
+  }
+  
     return { success: false, message: data.message || "Erreur lors de la mise à jour du profil" };
   } catch (error) {
     clearTimeout(timeoutId);
@@ -283,7 +316,7 @@ export const updateProfile = async (
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
         return { success: false, message: "La requête a expiré. Veuillez réessayer." };
-      }
+  }
       return { success: false, message: error.message };
     }
     return { success: false, message: "Erreur lors de la mise à jour du profil" };
@@ -511,33 +544,53 @@ export const getAllUsers = async (): Promise<User[]> => {
 };
 
 // Supprimer un utilisateur (pour l'admin)
-export const deleteUser = (userId: string): AuthResponse => {
-  // Ne pas supprimer l'utilisateur admin
-  if (userId.startsWith("admin-")) {
-    return { success: false, message: "Impossible de supprimer le compte administrateur" };
+export const deleteUser = async (userId: string): Promise<AuthResponse> => {
+  try {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      return { success: false, message: "Non authentifié" };
+    }
+
+    if (!currentUser.isAdmin) {
+      return { success: false, message: "Non autorisé" };
+    }
+    
+    // Ne pas supprimer l'utilisateur admin
+    if (userId.startsWith("admin-")) {
+      return { success: false, message: "Impossible de supprimer le compte administrateur" };
+    }
+    
+    const response = await fetch(`${API_URL}/auth/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'user-id': currentUser.id
+      }
+    });
+
+    if (!response.ok) {
+      let errorMessage = "Erreur lors de la suppression de l'utilisateur";
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        console.error("Impossible de parser la réponse d'erreur:", e);
+      }
+      return { success: false, message: errorMessage };
+    }
+
+    const data = await response.json();
+    return {
+      success: data.success,
+      message: data.message || "Utilisateur supprimé avec succès"
+    };
+  } catch (error) {
+    console.error("Erreur lors de la suppression de l'utilisateur:", error);
+    if (error instanceof Error) {
+      return { success: false, message: error.message };
+    }
+    return { success: false, message: "Une erreur est survenue lors de la suppression de l'utilisateur" };
   }
-  
-  const users = getUsers();
-  const userIndex = users.findIndex(u => u.id === userId);
-  
-  if (userIndex === -1) {
-    return { success: false, message: "Utilisateur non trouvé" };
-  }
-  
-  // Supprimer l'utilisateur
-  users.splice(userIndex, 1);
-  saveUsers(users);
-  
-  // Supprimer le mot de passe associé
-  const passwordsJson = localStorage.getItem(PASSWORDS_STORAGE_KEY) || '{}';
-  const passwords = JSON.parse(passwordsJson);
-  delete passwords[userId];
-  localStorage.setItem(PASSWORDS_STORAGE_KEY, JSON.stringify(passwords));
-  
-  return {
-    success: true,
-    message: "Utilisateur supprimé avec succès"
-  };
 };
 
 // Autoriser ou révoquer l'accès NSFW d'un utilisateur (pour l'admin)
@@ -586,14 +639,14 @@ export const toggleUserNsfwAuthorization = async (
         console.error('Impossible de parser la réponse d\'erreur (nsfw):', e);
       }
       throw new Error(errorMessage);
-    }
-
+  }
+  
     const data = await response.json();
     console.log('Données reçues (nsfw):', data);
 
     if (data.success && data.user) {
-      return { 
-        success: true, 
+  return {
+    success: true,
         message: data.message || "Permissions NSFW modifiées avec succès", 
         user: data.user 
       };

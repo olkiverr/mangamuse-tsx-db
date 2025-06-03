@@ -56,7 +56,7 @@
 .glow-spinner-container span:nth-of-type(4) {
   filter: blur(50px);
 }
-  
+
 .glow-spinner-container::after {
   content: "";
   position: absolute;

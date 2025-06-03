@@ -29,7 +29,7 @@ const AnimeCard: React.FC<AnimeCardProps> = ({ anime }) => {
 
   // Vérifier si des métadonnées sont disponibles
   const hasMetadata = (anime.season && anime.year) || anime.episodes > 0;
-  
+
   // Empêcher la propagation du clic sur les boutons
   const handleActionClick = (e: React.MouseEvent) => {
     e.preventDefault();

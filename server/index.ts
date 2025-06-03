@@ -7,6 +7,21 @@ const app = express();
 const prisma = new PrismaClient();
 const port = process.env.PORT || 3000;
 
+// Fonction utilitaire pour formater l'utilisateur pour le client
+const formatUserForClient = (user: any) => {
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    createdAt: user.createdAt.toISOString(),
+    isAdmin: user.isAdmin,
+    showNSFW: user.showNSFW,
+    nsfwAuthorized: user.nsfwAuthorized,
+    favorites: user.favorites.map((fav: any) => fav.animeId),
+    watched: user.watched.map((w: any) => w.animeId)
+  };
+};
+
 app.use(cors());
 app.use(express.json());
 
@@ -128,11 +143,14 @@ app.post('/api/auth/login', async (req, res) => {
       }
     });
 
+    // Transformer les données utilisateur pour le client
+    const formattedUser = formatUserForClient(user!);
+
     console.log(`[LOGIN] Succès - Utilisateur connecté: ${email}`);
     res.json({
       success: true,
       message: "Connexion réussie",
-      user
+      user: formattedUser
     });
   } catch (error) {
     console.error("\n[LOGIN] Erreur:", error);
@@ -174,11 +192,14 @@ app.get('/api/auth/check', async (req, res) => {
         message: "Utilisateur non trouvé"
       });
     }
+    
+    // Transformer les données utilisateur pour le client
+    const formattedUser = formatUserForClient(user);
 
     console.log(`[CHECK] Succès - Utilisateur authentifié: ${user.email}`);
     res.json({
       success: true,
-      user
+      user: formattedUser
     });
   } catch (error) {
     console.error("\n[CHECK] Erreur:", error);
@@ -233,11 +254,14 @@ app.post('/api/auth/profile', async (req, res) => {
       }
     });
 
+    // Transformer les données utilisateur pour le client
+    const formattedUser = formatUserForClient(updatedUser);
+
     console.log(`[PROFILE] Succès - Profil mis à jour pour: ${updatedUser.email}`);
     res.json({
       success: true,
       message: "Profil mis à jour avec succès",
-      user: updatedUser
+      user: formattedUser
     });
   } catch (error) {
     console.error("\n[PROFILE] Erreur:", error);
@@ -369,7 +393,7 @@ app.post('/api/auth/favorites', async (req, res) => {
     });
 
     console.log('[FAVORITES] Opération réussie');
-    res.json(updatedUser);
+    res.json(formatUserForClient(updatedUser));
   } catch (error) {
     console.error('[FAVORITES] Erreur détaillée:', error);
     if (error instanceof Error) {
@@ -444,7 +468,7 @@ app.post('/api/auth/watched', async (req, res) => {
     });
 
     console.log('[WATCHED] Opération réussie');
-    res.json(updatedUser);
+    res.json(formatUserForClient(updatedUser));
   } catch (error) {
     console.error('[WATCHED] Erreur détaillée:', error);
     if (error instanceof Error) {
@@ -498,6 +522,101 @@ app.post('/api/auth/search', async (req, res) => {
   } catch (error) {
     console.error('Erreur lors de la recherche:', error);
     res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// Route pour supprimer un utilisateur (admin uniquement)
+app.delete('/api/auth/users/:userId', async (req, res) => {
+  try {
+    const adminId = req.headers['user-id'] as string;
+    const { userId } = req.params;
+    
+    console.log(`\n[DELETE] Tentative de suppression de l'utilisateur: ${userId}`);
+    console.log(`[DELETE] Admin: ${adminId}`);
+
+    if (!adminId) {
+      console.log('[DELETE] Échec - Aucun ID administrateur fourni');
+      return res.status(401).json({
+        success: false,
+        message: "Non authentifié"
+      });
+    }
+
+    // Vérifier si l'utilisateur est admin
+    const admin = await prisma.user.findUnique({
+      where: { id: adminId }
+    });
+
+    if (!admin || !admin.isAdmin) {
+      console.log(`[DELETE] Échec - Utilisateur non admin: ${adminId}`);
+      return res.status(403).json({
+        success: false,
+        message: "Accès non autorisé"
+      });
+    }
+
+    // Vérifier si l'utilisateur à supprimer existe
+    const userToDelete = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!userToDelete) {
+      console.log(`[DELETE] Échec - Utilisateur cible non trouvé: ${userId}`);
+      return res.status(404).json({
+        success: false,
+        message: "Utilisateur non trouvé"
+      });
+    }
+
+    // Ne pas supprimer l'administrateur
+    if (userToDelete.isAdmin) {
+      console.log(`[DELETE] Échec - Tentative de suppression d'un admin: ${userId}`);
+      return res.status(403).json({
+        success: false,
+        message: "Impossible de supprimer le compte administrateur"
+      });
+    }
+
+    // Supprimer d'abord toutes les relations
+    console.log(`[DELETE] Suppression des données liées pour l'utilisateur: ${userId}`);
+    
+    // Supprimer les favoris
+    await prisma.favorite.deleteMany({
+      where: { userId }
+    });
+    
+    // Supprimer les animes vus
+    await prisma.watched.deleteMany({
+      where: { userId }
+    });
+    
+    // Supprimer les recherches
+    await prisma.search.deleteMany({
+      where: { userId }
+    });
+    
+    // Supprimer l'activité
+    await prisma.activity.deleteMany({
+      where: { userId }
+    });
+
+    // Maintenant supprimer l'utilisateur
+    await prisma.user.delete({
+      where: { id: userId }
+    });
+
+    console.log(`[DELETE] Succès - Utilisateur supprimé: ${userToDelete.email}`);
+    
+    res.json({
+      success: true,
+      message: "Utilisateur supprimé avec succès"
+    });
+  } catch (error) {
+    console.error("\n[DELETE] Erreur:", error);
+    res.status(500).json({
+      success: false,
+      message: "Une erreur est survenue lors de la suppression de l'utilisateur"
+    });
   }
 });
 
@@ -571,6 +690,166 @@ app.post('/api/auth/nsfw-authorization', async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Une erreur est survenue lors de la modification des permissions"
+    });
+  }
+});
+
+// Route pour changer le mot de passe
+app.post('/api/auth/password', async (req, res) => {
+  try {
+    const userId = req.headers['user-id'] as string;
+    const { currentPassword, newPassword } = req.body;
+    
+    console.log(`\n[PASSWORD] Tentative de changement de mot de passe pour l'utilisateur: ${userId}`);
+
+    if (!userId) {
+      console.log('[PASSWORD] Échec - Aucun ID utilisateur fourni');
+      return res.status(401).json({
+        success: false,
+        message: "Non authentifié"
+      });
+    }
+
+    if (!currentPassword || !newPassword) {
+      console.log('[PASSWORD] Échec - Données manquantes');
+      return res.status(400).json({
+        success: false,
+        message: "Tous les champs sont obligatoires"
+      });
+    }
+
+    if (newPassword.length < 6) {
+      console.log('[PASSWORD] Échec - Mot de passe trop court');
+      return res.status(400).json({
+        success: false,
+        message: "Le nouveau mot de passe doit contenir au moins 6 caractères"
+      });
+    }
+
+    // Vérifier si l'utilisateur existe
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!user) {
+      console.log(`[PASSWORD] Échec - Utilisateur non trouvé: ${userId}`);
+      return res.status(404).json({
+        success: false,
+        message: "Utilisateur non trouvé"
+      });
+    }
+
+    // Vérifier si le mot de passe actuel est correct
+    const validPassword = await bcrypt.compare(currentPassword, (user as any).password);
+    if (!validPassword) {
+      console.log('[PASSWORD] Échec - Mot de passe actuel incorrect');
+      return res.status(401).json({
+        success: false,
+        message: "Le mot de passe actuel est incorrect"
+      });
+    }
+
+    // Hasher le nouveau mot de passe
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    // Mettre à jour le mot de passe
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword }
+    });
+
+    console.log(`[PASSWORD] Succès - Mot de passe changé pour: ${user.email}`);
+    res.json({
+      success: true,
+      message: "Mot de passe changé avec succès"
+    });
+  } catch (error) {
+    console.error("\n[PASSWORD] Erreur:", error);
+    res.status(500).json({
+      success: false,
+      message: "Une erreur est survenue lors du changement de mot de passe"
+    });
+  }
+});
+
+// Route pour changer le mot de passe (admin uniquement)
+app.post('/api/auth/admin-password', async (req, res) => {
+  try {
+    const adminId = req.headers['user-id'] as string;
+    const { userId, newPassword } = req.body;
+    
+    console.log(`\n[ADMIN-PASSWORD] Tentative de changement de mot de passe pour l'utilisateur: ${userId}`);
+    console.log(`[ADMIN-PASSWORD] Admin: ${adminId}`);
+
+    if (!adminId) {
+      console.log('[ADMIN-PASSWORD] Échec - Aucun ID administrateur fourni');
+      return res.status(401).json({
+        success: false,
+        message: "Non authentifié"
+      });
+    }
+
+    // Vérifier si l'utilisateur est admin
+    const admin = await prisma.user.findUnique({
+      where: { id: adminId }
+    });
+
+    if (!admin || !admin.isAdmin) {
+      console.log(`[ADMIN-PASSWORD] Échec - Utilisateur non admin: ${adminId}`);
+      return res.status(403).json({
+        success: false,
+        message: "Accès non autorisé"
+      });
+    }
+
+    if (!userId || !newPassword) {
+      console.log('[ADMIN-PASSWORD] Échec - Données manquantes');
+      return res.status(400).json({
+        success: false,
+        message: "Tous les champs sont obligatoires"
+      });
+    }
+
+    if (newPassword.length < 6) {
+      console.log('[ADMIN-PASSWORD] Échec - Mot de passe trop court');
+      return res.status(400).json({
+        success: false,
+        message: "Le nouveau mot de passe doit contenir au moins 6 caractères"
+      });
+    }
+
+    // Vérifier si l'utilisateur existe
+    const userToUpdate = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!userToUpdate) {
+      console.log(`[ADMIN-PASSWORD] Échec - Utilisateur cible non trouvé: ${userId}`);
+      return res.status(404).json({
+        success: false,
+        message: "Utilisateur non trouvé"
+      });
+    }
+
+    // Hasher le nouveau mot de passe
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    // Mettre à jour le mot de passe
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword }
+    });
+
+    console.log(`[ADMIN-PASSWORD] Succès - Mot de passe changé pour: ${userToUpdate.email}`);
+    res.json({
+      success: true,
+      message: "Mot de passe changé avec succès"
+    });
+  } catch (error) {
+    console.error("\n[ADMIN-PASSWORD] Erreur:", error);
+    res.status(500).json({
+      success: false,
+      message: "Une erreur est survenue lors du changement de mot de passe"
     });
   }
 });
