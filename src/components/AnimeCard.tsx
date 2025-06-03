@@ -29,6 +29,12 @@ const AnimeCard: React.FC<AnimeCardProps> = ({ anime }) => {
 
   // Vérifier si des métadonnées sont disponibles
   const hasMetadata = (anime.season && anime.year) || anime.episodes > 0;
+  
+  // Empêcher la propagation du clic sur les boutons
+  const handleActionClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   return (
     <Link to={`/anime/${anime.mal_id}`} className="anime-card-link">
@@ -53,7 +59,7 @@ const AnimeCard: React.FC<AnimeCardProps> = ({ anime }) => {
           <div className="anime-info-header">
             <h3 className="anime-title" title={anime.title}>{anime.title}</h3>
             {isAuthenticated && (
-              <div className="anime-info-actions">
+              <div className="anime-info-actions" onClick={handleActionClick}>
                 <div className="anime-info-favorite">
                   <FavoriteButton 
                     animeId={anime.mal_id} 

@@ -19,7 +19,10 @@ const WatchedButton: React.FC<WatchedButtonProps> = ({ animeId, title, imageUrl 
     setIsWatchedState(isWatched(animeId));
   }, [isWatched, animeId]);
 
-  const handleToggleWatched = async () => {
+  const handleToggleWatched = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!isAuthenticated) {
       setShowTooltip(true);
       setTimeout(() => setShowTooltip(false), 2000);

@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 export const createUser = async (userData: {
   username: string;
   email: string;
+  password: string;
   isAdmin?: boolean;
   showNSFW?: boolean;
   nsfwAuthorized?: boolean;

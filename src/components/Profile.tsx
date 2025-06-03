@@ -6,6 +6,7 @@ import { fetchAnimeDetails, Anime } from '../services/animeService';
 import LoadingSpinner from './LoadingSpinner';
 import AnimeCard from './AnimeCard';
 import './Profile.css';
+import { checkAuth } from '../services/authService';
 
 interface Favorite {
   animeId: number;
@@ -26,6 +27,7 @@ const Profile: React.FC = () => {
   const [loadingFavorites, setLoadingFavorites] = useState(false);
   const [loadingWatched, setLoadingWatched] = useState(false);
   const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
+  const [refreshing, setRefreshing] = useState(false);
   
   // États pour le changement de mot de passe
   const [currentPassword, setCurrentPassword] = useState('');
@@ -33,17 +35,54 @@ const Profile: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
 
+  // Fonction pour rafraîchir les données utilisateur
+  const refreshUserData = async () => {
+    if (!user) return;
+    
+    setRefreshing(true);
+    try {
+      console.log('Rafraîchissement des données utilisateur...');
+      const response = await checkAuth(user.id);
+      
+      if (response.success && response.user) {
+        console.log('Données utilisateur rafraîchies avec succès');
+        // Mettre à jour les données dans localStorage
+        localStorage.setItem('mangamuse_current_user', JSON.stringify(response.user));
+        
+        // Forcer le rechargement des favoris et des vus
+        if (response.user.favorites) {
+          loadFavoriteAnimes(response.user);
+        }
+        
+        if (response.user.watched) {
+          loadWatchedAnimes(response.user);
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors du rafraîchissement des données utilisateur:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       setUsername(user.username);
       setEmail(user.email);
+      // Rafraîchir les données au chargement de la page
+      refreshUserData();
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user) {
       loadFavoriteAnimes();
       loadWatchedAnimes();
     }
   }, [user?.favorites, user?.watched]);
 
-  const loadFavoriteAnimes = async () => {
-    if (!user || !user.favorites || user.favorites.length === 0) {
+  const loadFavoriteAnimes = async (currentUser = user) => {
+    if (!currentUser || !currentUser.favorites || currentUser.favorites.length === 0) {
       setFavoriteAnimes([]);
       return;
     }
@@ -54,7 +93,7 @@ const Profile: React.FC = () => {
     try {
       // Load details for each favorite anime
       // To avoid API rate limiting, add a delay between requests
-      for (const favorite of user.favorites) {
+      for (const favorite of currentUser.favorites) {
         try {
           // Extraire l'ID de l'anime de l'objet favorite
           const animeId = typeof favorite === 'object' ? (favorite as Favorite).animeId : favorite;
@@ -78,8 +117,8 @@ const Profile: React.FC = () => {
     }
   };
 
-  const loadWatchedAnimes = async () => {
-    if (!user || !user.watched || user.watched.length === 0) {
+  const loadWatchedAnimes = async (currentUser = user) => {
+    if (!currentUser || !currentUser.watched || currentUser.watched.length === 0) {
       setWatchedAnimes([]);
       return;
     }
@@ -90,7 +129,7 @@ const Profile: React.FC = () => {
     try {
       // Load details for each watched anime
       // To avoid API rate limiting, add a delay between requests
-      for (const watched of user.watched) {
+      for (const watched of currentUser.watched) {
         try {
           // Extraire l'ID de l'anime de l'objet watched
           const animeId = typeof watched === 'object' ? (watched as Favorite).animeId : watched;
@@ -230,6 +269,16 @@ const Profile: React.FC = () => {
     <div className="profile-container">
       <div className="profile-header">
         <h2>My Profile</h2>
+        <div className="profile-actions-top">
+          <button 
+            className="refresh-button" 
+            onClick={refreshUserData}
+            disabled={refreshing}
+            title="Rafraîchir les données"
+          >
+            {refreshing ? "Rafraîchissement..." : "Rafraîchir"}
+          </button>
+        </div>
         <div className="profile-tabs">
           <button 
             className={`profile-tab ${activeTab === 'profile' ? 'active' : ''}`}

@@ -189,6 +189,65 @@ app.get('/api/auth/check', async (req, res) => {
   }
 });
 
+// Route pour mettre à jour le profil utilisateur
+app.post('/api/auth/profile', async (req, res) => {
+  try {
+    const userId = req.headers['user-id'] as string;
+    const updates = req.body;
+    console.log(`\n[PROFILE] Tentative de mise à jour du profil pour l'utilisateur: ${userId}`);
+    console.log(`[PROFILE] Données à mettre à jour:`, updates);
+    
+    if (!userId) {
+      console.log('[PROFILE] Échec - Aucun ID utilisateur fourni');
+      return res.status(401).json({
+        success: false,
+        message: "Non authentifié"
+      });
+    }
+
+    // Vérifier si l'utilisateur existe
+    const userExists = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!userExists) {
+      console.log(`[PROFILE] Échec - Utilisateur non trouvé: ${userId}`);
+      return res.status(404).json({
+        success: false,
+        message: "Utilisateur non trouvé"
+      });
+    }
+
+    // Extraire les champs à mettre à jour (ignorer les relations)
+    const { favorites, watched, activity, searches, ...userUpdates } = updates;
+    
+    // Mettre à jour l'utilisateur
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: userUpdates,
+      include: {
+        favorites: true,
+        watched: true,
+        activity: true,
+        searches: true
+      }
+    });
+
+    console.log(`[PROFILE] Succès - Profil mis à jour pour: ${updatedUser.email}`);
+    res.json({
+      success: true,
+      message: "Profil mis à jour avec succès",
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error("\n[PROFILE] Erreur:", error);
+    res.status(500).json({
+      success: false,
+      message: "Une erreur est survenue lors de la mise à jour du profil"
+    });
+  }
+});
+
 // Route pour récupérer tous les utilisateurs (admin uniquement)
 app.get('/api/auth/users', async (req, res) => {
   try {
@@ -301,7 +360,12 @@ app.post('/api/auth/favorites', async (req, res) => {
 
     updatedUser = await prisma.user.findUnique({
       where: { id: userId as string },
-      include: { favorites: true }
+      include: { 
+        favorites: true,
+        watched: true,
+        activity: true,
+        searches: true
+      }
     });
 
     console.log('[FAVORITES] Opération réussie');
@@ -371,7 +435,12 @@ app.post('/api/auth/watched', async (req, res) => {
 
     updatedUser = await prisma.user.findUnique({
       where: { id: userId as string },
-      include: { watched: true }
+      include: { 
+        favorites: true,
+        watched: true,
+        activity: true,
+        searches: true
+      }
     });
 
     console.log('[WATCHED] Opération réussie');
@@ -429,6 +498,80 @@ app.post('/api/auth/search', async (req, res) => {
   } catch (error) {
     console.error('Erreur lors de la recherche:', error);
     res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// Route pour autoriser/révoquer l'accès NSFW (admin uniquement)
+app.post('/api/auth/nsfw-authorization', async (req, res) => {
+  try {
+    const adminId = req.headers['user-id'] as string;
+    const { userId } = req.body;
+    
+    console.log(`\n[NSFW] Tentative de modification des permissions NSFW pour l'utilisateur: ${userId}`);
+    console.log(`[NSFW] Admin: ${adminId}`);
+
+    if (!adminId) {
+      console.log('[NSFW] Échec - Aucun ID administrateur fourni');
+      return res.status(401).json({
+        success: false,
+        message: "Non authentifié"
+      });
+    }
+
+    // Vérifier si l'utilisateur est admin
+    const admin = await prisma.user.findUnique({
+      where: { id: adminId }
+    });
+
+    if (!admin || !admin.isAdmin) {
+      console.log(`[NSFW] Échec - Utilisateur non admin: ${adminId}`);
+      return res.status(403).json({
+        success: false,
+        message: "Accès non autorisé"
+      });
+    }
+
+    // Vérifier si l'utilisateur à modifier existe
+    const userToUpdate = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!userToUpdate) {
+      console.log(`[NSFW] Échec - Utilisateur cible non trouvé: ${userId}`);
+      return res.status(404).json({
+        success: false,
+        message: "Utilisateur non trouvé"
+      });
+    }
+
+    // Basculer l'autorisation NSFW
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { 
+        nsfwAuthorized: !userToUpdate.nsfwAuthorized 
+      },
+      include: {
+        favorites: true,
+        watched: true,
+        activity: true,
+        searches: true
+      }
+    });
+
+    const actionType = updatedUser.nsfwAuthorized ? "granted" : "revoked";
+    console.log(`[NSFW] Succès - Accès NSFW ${actionType} pour l'utilisateur: ${updatedUser.email}`);
+    
+    res.json({
+      success: true,
+      message: `NSFW access ${actionType} for user ${updatedUser.username}`,
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error("\n[NSFW] Erreur:", error);
+    res.status(500).json({
+      success: false,
+      message: "Une erreur est survenue lors de la modification des permissions"
+    });
   }
 });
 

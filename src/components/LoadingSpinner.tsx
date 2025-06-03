@@ -8,13 +8,15 @@ interface LoadingSpinnerProps {
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ message = 'Loading...' }) => {
   return (
     <div className="loading-spinner-container">
-      <div className="glow-spinner-container">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
+      <div className="spinner-wrapper">
+        <div className="glow-spinner-container">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
-      {message && <p className="loading-message">{message}</p>}
+      {message && <div className="loading-message">{message}</div>}
     </div>
   );
 };

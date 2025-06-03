@@ -35,7 +35,40 @@
   color: var(--text-secondary);
 }
 
+.loading-favorites,
 .loading-watched {
   padding: 40px 0;
   text-align: center;
+  min-height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-secondary, rgba(30, 30, 30, 0.2));
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.profile-actions-top {
+  display: flex;
+  margin-bottom: 15px;
+}
+
+.refresh-button {
+  background-color: #4c6ef5;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.refresh-button:hover {
+  background-color: #3b5bd9;
+}
+
+.refresh-button:disabled {
+  background-color: #c4c9e4;
+  cursor: not-allowed;
 } 

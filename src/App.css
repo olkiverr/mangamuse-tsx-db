@@ -1,5 +1,12 @@
 :root {
   --border-color-rgb: 200, 200, 200;
+  --spinner-glow-primary: rgba(124, 77, 255, 0.7);
+  --spinner-glow-secondary: rgba(77, 166, 255, 0.5);
+  --spinner-glow-tertiary: rgba(90, 209, 205, 0.5);
+  --spinner-gradient-1: linear-gradient(135deg, #9b59b6, #84cdfa, #5ad1cd);
+  --spinner-gradient-2: linear-gradient(135deg, #9b59b6, #84cdfa);
+  --spinner-gradient-3: linear-gradient(135deg, #84cdfa, #5ad1cd);
+  --spinner-background: #000;
 }
 
 .app {

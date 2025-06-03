@@ -13,7 +13,7 @@ const CURRENT_USER_KEY = 'mangamuse_current_user';
 const PASSWORDS_STORAGE_KEY = 'mangamuse_passwords';
 const ADMIN_INITIALIZED_KEY = 'mangamuse_admin_initialized';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://192.168.1.204:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // Récupérer tous les utilisateurs du localStorage
 const getUsers = (): User[] => {
@@ -213,46 +213,81 @@ export const logout = (): void => {
 };
 
 // Mettre à jour le profil utilisateur
-export const updateProfile = (
+export const updateProfile = async (
   userId: string,
   updates: Partial<User>
-): AuthResponse => {
-  const users = getUsers();
-  const userIndex = users.findIndex(u => u.id === userId);
-  
-  if (userIndex === -1) {
-    return { success: false, message: "Utilisateur non trouvé" };
+): Promise<AuthResponse> => {
+  const user = getCurrentUser();
+  if (!user) {
+    return { success: false, message: "Utilisateur non connecté" };
   }
-  
-  // Si l'email est mis à jour, vérifier qu'il n'est pas déjà utilisé
-  if (updates.email && 
-      updates.email !== users[userIndex].email && 
-      isEmailTaken(updates.email)) {
-    return { success: false, message: "Cet email est déjà utilisé" };
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes timeout
+
+  try {
+    console.log('Envoi de la requête updateProfile:', {
+      userId,
+      updates
+    });
+
+    const response = await fetch(`${API_URL}/auth/profile`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'user-id': userId
+      },
+      body: JSON.stringify(updates),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    console.log('Réponse du serveur (profile):', {
+      status: response.status,
+      statusText: response.statusText,
+      headers: Object.fromEntries(response.headers.entries())
+    });
+
+    if (!response.ok) {
+      let errorMessage = 'Erreur lors de la mise à jour du profil';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+        console.error('Détails de l\'erreur (profile):', errorData);
+      } catch (e) {
+        console.error('Impossible de parser la réponse d\'erreur (profile):', e);
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    console.log('Données reçues (profile):', data);
+
+    // Si nous recevons directement les données de l'utilisateur
+    if (data.user) {
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(data.user));
+      return { success: true, message: data.message || "Profil mis à jour avec succès", user: data.user };
+    }
+
+    return { success: false, message: data.message || "Erreur lors de la mise à jour du profil" };
+  } catch (error) {
+    clearTimeout(timeoutId);
+    console.error('Erreur détaillée lors de la mise à jour du profil:', {
+      error,
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        return { success: false, message: "La requête a expiré. Veuillez réessayer." };
+      }
+      return { success: false, message: error.message };
+    }
+    return { success: false, message: "Erreur lors de la mise à jour du profil" };
   }
-  
-  // Si le nom d'utilisateur est mis à jour, vérifier qu'il n'est pas déjà pris
-  if (updates.username && 
-      updates.username !== users[userIndex].username && 
-      isUsernameTaken(updates.username)) {
-    return { success: false, message: "Ce nom d'utilisateur est déjà pris" };
-  }
-  
-  // Mettre à jour l'utilisateur
-  users[userIndex] = { ...users[userIndex], ...updates };
-  saveUsers(users);
-  
-  // Mettre à jour l'utilisateur actuellement connecté si c'est le même
-  const currentUser = getCurrentUser();
-  if (currentUser && currentUser.id === userId) {
-    saveCurrentUser(users[userIndex]);
-  }
-  
-  return {
-    success: true,
-    message: "Profil mis à jour avec succès",
-    user: users[userIndex]
-  };
 };
 
 // Ajouter/Supprimer un anime des favoris
@@ -506,35 +541,85 @@ export const deleteUser = (userId: string): AuthResponse => {
 };
 
 // Autoriser ou révoquer l'accès NSFW d'un utilisateur (pour l'admin)
-export const toggleUserNsfwAuthorization = (
+export const toggleUserNsfwAuthorization = async (
   userId: string
-): AuthResponse => {
-  const users = getUsers();
-  const userIndex = users.findIndex(u => u.id === userId);
-  
-  if (userIndex === -1) {
-    return { success: false, message: "Utilisateur non trouvé" };
+): Promise<AuthResponse> => {
+  const user = getCurrentUser();
+  if (!user || !user.isAdmin) {
+    return { success: false, message: "Non autorisé" };
   }
 
-  // S'assurer que la propriété existe
-  const currentAuthorization = !!users[userIndex].nsfwAuthorized;
-  users[userIndex].nsfwAuthorized = !currentAuthorization;
-  
-  saveUsers(users);
-  
-  // Mettre à jour l'utilisateur actuel si c'est le même
-  const currentUser = getCurrentUser();
-  if (currentUser && currentUser.id === userId) {
-    saveCurrentUser(users[userIndex]);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes timeout
+
+  try {
+    console.log('Envoi de la requête toggleUserNsfwAuthorization:', {
+      adminId: user.id,
+      userId
+    });
+
+    const response = await fetch(`${API_URL}/auth/nsfw-authorization`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'user-id': user.id
+      },
+      body: JSON.stringify({ userId }),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    console.log('Réponse du serveur (nsfw-authorization):', {
+      status: response.status,
+      statusText: response.statusText,
+      headers: Object.fromEntries(response.headers.entries())
+    });
+
+    if (!response.ok) {
+      let errorMessage = 'Erreur lors de la modification des permissions NSFW';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+        console.error('Détails de l\'erreur (nsfw):', errorData);
+      } catch (e) {
+        console.error('Impossible de parser la réponse d\'erreur (nsfw):', e);
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    console.log('Données reçues (nsfw):', data);
+
+    if (data.success && data.user) {
+      return { 
+        success: true, 
+        message: data.message || "Permissions NSFW modifiées avec succès", 
+        user: data.user 
+      };
+    }
+
+    return { 
+      success: false, 
+      message: data.message || "Erreur lors de la modification des permissions NSFW" 
+    };
+  } catch (error) {
+    clearTimeout(timeoutId);
+    console.error('Erreur détaillée lors de la modification des permissions NSFW:', {
+      error,
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        return { success: false, message: "La requête a expiré. Veuillez réessayer." };
+      }
+      return { success: false, message: error.message };
+    }
+    return { success: false, message: "Erreur lors de la modification des permissions NSFW" };
   }
-  
-  const actionType = users[userIndex].nsfwAuthorized ? "granted" : "revoked";
-  
-  return {
-    success: true,
-    message: `NSFW access ${actionType} for user ${users[userIndex].username}`,
-    user: users[userIndex]
-  };
 };
 
 export const checkAuth = async (userId: string): Promise<AuthResponse> => {
