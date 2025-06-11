@@ -14,6 +14,9 @@ import AdminPanel from './components/AdminPanel';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { fetchTrendingAnimes, fetchUpcomingAnimes, fetchRandomAnime, Anime } from './services/animeService';
 import AdvancedSearch from './components/AdvancedSearch';
+import ForumPage from './components/forum/ForumPage';
+import CreatePost from './components/forum/CreatePost';
+import SubredditManager from './components/forum/SubredditManager';
 
 // Composant de protection des routes admin
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -82,6 +85,12 @@ const Header: React.FC = () => {
           </Link>
         </div>
         <div className="header-actions">
+          <Link to="/forum" className="forum-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '8px'}}>
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Forum
+          </Link>
           <button onClick={openRandomAnime} className="random-anime-button">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '8px'}}>
               <path d="M7 16V4M7 4L3 8M7 4L11 8"></path>
@@ -308,10 +317,13 @@ function AppContent() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/anime/:id" element={<AnimeDetails />} />
+              <Route path="/search" element={<AdvancedSearch />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/search" element={<AdvancedSearch />} />
+              <Route path="/forum" element={<ForumPage />} />
+              <Route path="/forum/create" element={<CreatePost />} />
+              <Route path="/forum/manage" element={<SubredditManager />} />
               <Route path="/admin" element={
                 <AdminRoute>
                   <AdminPanel />
